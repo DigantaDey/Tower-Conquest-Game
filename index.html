@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tower Conquest Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="menu">
+    <h1>Tower Conquest Game</h1>
+    <button id="vsAI">Play Against AI</button>
+    <button id="vsPlayer">Two-Player Game</button>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
+  
+  <div id="turnIndicator" style="display: none; text-align: center; font-size: 18px; margin-top: 10px;"></div>
+  
+  <!-- Game Controls -->
+  <div id="gameControls" style="display: none; text-align: center; margin-top: 10px;">
+    <button id="pauseButton">Pause</button>
+    <button id="resumeButton" style="display: none;">Resume</button>
+    <button id="restartButton">Restart</button>
+  </div>
+  
+  <!-- Game Information -->
+  <div id="gameInfo" style="display: none; text-align: center; font-size: 16px; margin-top: 10px;"></div>
+  
+  <canvas id="gameCanvas" style="display: none;"></canvas>
+  
+  <script src="script.js"></script>
+</body>
+</html>

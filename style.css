@@ -1,0 +1,41 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#gameCanvas {
+    display: block;
+    background-color: #f0f0f0;
+}
+
+.tower {
+    stroke: #000;
+}
+
+.player-tower {
+    fill: #4CAF50;
+}
+
+.enemy-tower {
+    fill: #F44336;
+}
+
+.neutral-tower {
+    fill: #9E9E9E;
+}
+
+.connection {
+    stroke-width: 3px;
+}
+
+.player-connection {
+    stroke: #4CAF50;
+}
+
+.enemy-connection {
+    stroke: #F44336;
+}
+
+.obstacle {
+    fill: #795548;
+}
