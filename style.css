@@ -1,41 +1,215 @@
+/* General Styles */
 body {
-    margin: 0;
-    overflow: hidden;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling */
+  background-color: #333; /* Background color for the game */
+  font-family: Arial, sans-serif;
+  color: #fff;
+  position: relative; /* For positioning child elements */
 }
 
+/* Hide the canvas initially */
 #gameCanvas {
-    display: block;
-    background-color: #f0f0f0;
+  display: none;
 }
 
-.tower {
-    stroke: #000;
+/* Menu Styles */
+#menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
 
-.player-tower {
-    fill: #4CAF50;
+#menu h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
 }
 
-.enemy-tower {
-    fill: #F44336;
+#menu button {
+  padding: 15px 30px;
+  margin: 10px;
+  font-size: 18px;
+  cursor: pointer;
 }
 
-.neutral-tower {
-    fill: #9E9E9E;
+/* Difficulty Select */
+#difficulty {
+  padding: 10px;
+  font-size: 16px;
+  margin-top: 20px;
 }
 
-.connection {
-    stroke-width: 3px;
+/* Turn Indicator */
+#turnIndicator {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 24px;
 }
 
-.player-connection {
-    stroke: #4CAF50;
+/* Game Information */
+#gameInfo {
+  position: absolute;
+  top: 10px;
+  right: 50px; /* Adjusted to make room for info icon */
+  font-size: 18px;
+  text-align: right;
 }
 
-.enemy-connection {
-    stroke: #F44336;
+/* Game Controls */
+#gameControls {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.obstacle {
-    fill: #795548;
+#gameControls button {
+  padding: 10px 20px;
+  margin: 0 5px; /* Reduced margin to fit the legend toggle button */
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Popup Overlay Styles */
+#popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+#popupOverlay div {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+}
+
+/* Buttons Hover Effects */
+button:hover {
+  background-color: #555;
+  color: #fff;
+}
+
+/* Info Icon Styles */
+#infoIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #555;
+  color: #fff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#infoIcon:hover #infoTooltip {
+  display: block;
+}
+
+#infoTooltip {
+  display: none;
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: #fff;
+  color: #333;
+  padding: 15px;
+  border-radius: 5px;
+  width: 250px;
+  z-index: 1001;
+}
+
+#infoTooltip h3 {
+  margin-top: 0;
+}
+
+/* Game Legend Styles */
+#gameLegend {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 5px;
+  width: 220px;
+}
+
+#gameLegend h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: #fff;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+
+.legendItem img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+.legendItem span {
+  font-size: 16px;
+  color: #fff;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600px) {
+  #menu h1 {
+    font-size: 36px;
+  }
+
+  #menu button {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+
+  #turnIndicator,
+  #gameInfo {
+    font-size: 16px;
+  }
+
+  #gameControls button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  #popupOverlay div {
+    font-size: 20px;
+    padding: 15px;
+  }
+
+  #infoTooltip {
+    width: 200px;
+  }
+
+  #gameLegend {
+    width: 180px;
+  }
+
+  .legendItem span {
+    font-size: 14px;
+  }
 }
