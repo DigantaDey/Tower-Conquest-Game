@@ -18,6 +18,9 @@ const gameControls = document.getElementById('gameControls');
 const pauseButton = document.getElementById('pauseButton');
 const resumeButton = document.getElementById('resumeButton');
 const restartButton = document.getElementById('restartButton');
+const infoIcon = document.getElementById('infoIcon');
+const gameLegend = document.getElementById('gameLegend');
+const legendToggle = document.getElementById('legendToggle'); // Reference to the legend toggle button
 
 let difficulty = 'medium';
 
@@ -218,7 +221,7 @@ function initGame() {
       numObstacles = 15;
       break;
     default:
-      numNeutralTowers = 5;
+      numNeutralTowers = 15;
       numObstacles = 13;
   }
 
@@ -308,6 +311,12 @@ function startGame() {
   isPaused = false;
   pauseButton.style.display = 'inline-block';
   resumeButton.style.display = 'none';
+
+  // Show the info icon, game legend, and legend toggle button
+  infoIcon.style.display = 'block';
+  gameLegend.style.display = 'block';
+  legendToggle.style.display = 'inline-block'; // Show the legend toggle button
+  legendToggle.textContent = 'Hide Legend'; // Set initial text
 
   if (gameMode === 'singleplayer') {
     aiInterval = setInterval(aiTurn, 2000);
@@ -703,6 +712,11 @@ function resetGame() {
   gameControls.style.display = 'none';
   gameInfo.style.display = 'none';
   canvas.style.display = 'none';
+
+  // Hide the info icon, game legend, and legend toggle button
+  infoIcon.style.display = 'none';
+  gameLegend.style.display = 'none';
+  legendToggle.style.display = 'none'; // Hide the legend toggle button
 }
 
 // Pause and Resume Controls
@@ -724,6 +738,17 @@ restartButton.addEventListener('click', () => {
   startGame();
 });
 
+// Legend Toggle Functionality
+legendToggle.addEventListener('click', () => {
+  if (gameLegend.style.display === 'block') {
+    gameLegend.style.display = 'none';
+    legendToggle.textContent = 'Show Legend';
+  } else {
+    gameLegend.style.display = 'block';
+    legendToggle.textContent = 'Hide Legend';
+  }
+});
+
 // Prevent scrolling on mobile devices
 document.body.addEventListener('touchmove', function(event) {
   event.preventDefault();
@@ -732,4 +757,8 @@ document.body.addEventListener('touchmove', function(event) {
 // Start the game when the page loads
 window.onload = () => {
   resizeCanvas();
+  // Hide the info icon, game legend, and legend toggle button on load
+  infoIcon.style.display = 'none';
+  gameLegend.style.display = 'none';
+  legendToggle.style.display = 'none';
 };
