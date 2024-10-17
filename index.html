@@ -7,30 +7,64 @@
 </head>
 <body>
   <div id="menu">
-    <h1>Tower Conquest Game</h1>
-    <button id="vsAI">Play Against AI</button>
-    <button id="vsPlayer">Two-Player Game</button>
+    <h1>Tower Conquest</h1>
+    <button id="vsAI">Play vs AI</button>
+    <button id="vsPlayer">Play vs Player</button>
     <select id="difficulty">
       <option value="easy">Easy</option>
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
   </div>
-  
-  <div id="turnIndicator" style="display: none; text-align: center; font-size: 18px; margin-top: 10px;"></div>
-  
-  <!-- Game Controls -->
-  <div id="gameControls" style="display: none; text-align: center; margin-top: 10px;">
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="turnIndicator"></div>
+  <div id="gameInfo"></div>
+  <div id="gameControls">
     <button id="pauseButton">Pause</button>
     <button id="resumeButton" style="display: none;">Resume</button>
     <button id="restartButton">Restart</button>
+    <!-- Legend Toggle Button -->
+    <button id="legendToggle">Hide Legend</button>
   </div>
-  
-  <!-- Game Information -->
-  <div id="gameInfo" style="display: none; text-align: center; font-size: 16px; margin-top: 10px;"></div>
-  
-  <canvas id="gameCanvas" style="display: none;"></canvas>
-  
+
+  <!-- Information Icon -->
+  <div id="infoIcon">i
+    <div id="infoTooltip">
+      <h3>How to Play</h3>
+      <p>Connect your towers to attack enemy towers or support your own.</p>
+      <p>Earn points by capturing towers. The first to conquer all towers wins.</p>
+      <p>Each tower type has unique abilities.</p>
+      <p>Use the "Legend" button to show or hide the game legend.</p>
+    </div>
+  </div>
+
+  <!-- Game Legend -->
+  <div id="gameLegend">
+    <h3>Game Legend</h3>
+    <div class="legendItem">
+      <img src="images/player1_tower.png" alt="Player 1 Tower">
+      <span>Player 1 Tower</span>
+    </div>
+    <div class="legendItem">
+      <img src="images/player2_tower.png" alt="Player 2 Tower">
+      <span>Player 2 Tower</span>
+    </div>
+    <div class="legendItem">
+      <img src="images/ai_tower.png" alt="AI Tower">
+      <span>AI Tower</span>
+    </div>
+    <div class="legendItem">
+      <img src="images/neutral_tower.png" alt="Neutral Tower">
+      <span>Neutral Tower</span>
+    </div>
+    <div class="legendItem">
+      <img src="images/obstacle.png" alt="Obstacle">
+      <span>Obstacle</span>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
