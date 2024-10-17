@@ -21,6 +21,8 @@ const restartButton = document.getElementById('restartButton');
 const infoIcon = document.getElementById('infoIcon');
 const gameLegend = document.getElementById('gameLegend');
 const legendToggle = document.getElementById('legendToggle'); // Reference to the legend toggle button
+const passButton = document.getElementById('passButton'); // Reference to the pass turn button
+const undoButton = document.getElementById('undoButton'); // Reference to the undo button
 
 let difficulty = 'medium';
 
@@ -33,6 +35,9 @@ const playerPoints = {
   player1: 0,
   player2: 0,
 };
+
+let lastAction = null; // To store the last action for undo
+let undoTimeout = null; // To store the undo timeout
 
 // Load images
 const towerImages = {
@@ -202,6 +207,9 @@ function initGame() {
   playerPoints.player1 = 0;
   playerPoints.player2 = 0;
   currentPlayer = 'player1';
+  lastAction = null;
+  clearTimeout(undoTimeout);
+  undoButton.style.display = 'none';
 
   // Adjust numbers based on difficulty
   let numNeutralTowers;
@@ -318,6 +326,8 @@ function startGame() {
   legendToggle.style.display = 'inline-block'; // Show the legend toggle button
   legendToggle.textContent = 'Hide Legend'; // Set initial text
 
+  passButton.style.display = 'inline-block'; // Show the pass turn button
+
   if (gameMode === 'singleplayer') {
     aiInterval = setInterval(aiTurn, 2000);
   } else {
@@ -380,6 +390,45 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 function handleMouseDown(mouseX, mouseY) {
+  let connectionClicked = false;
+
+  // Check if the player clicked on a connection
+  for (let i = 0; i < connections.length; i++) {
+    const conn = connections[i];
+    if (isPointOnLineSegment(mouseX, mouseY, conn.from.x, conn.from.y, conn.to.x, conn.to.y)) {
+      // Remove the connection if it belongs to the current player
+      if (conn.from.owner === currentPlayer || (gameMode === 'singleplayer' && conn.from.owner === 'player1')) {
+        // Store the last action for undo
+        lastAction = {
+          type: 'removeConnection',
+          connection: conn,
+          index: i,
+          player: currentPlayer,
+        };
+
+        connections.splice(i, 1);
+        connectionClicked = true;
+
+        // Show the undo button and set timeout
+        showUndoOption();
+
+        // Since removing a connection counts as a move, switch turns if in multiplayer mode
+        if (gameMode === 'multiplayer') {
+          currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+          updateTurnIndicator();
+        }
+
+        // In singleplayer mode, no need to switch currentPlayer, but we may need to trigger AI action
+        break; // Exit the loop after removing the connection
+      }
+    }
+  }
+
+  if (connectionClicked) {
+    return; // Do not proceed to select a tower if a connection was clicked
+  }
+
+  // Existing code to select towers
   towers.forEach((tower) => {
     if (tower.owner === currentPlayer || (gameMode === 'singleplayer' && tower.owner === 'player1')) {
       const dx = mouseX - tower.x;
@@ -389,6 +438,28 @@ function handleMouseDown(mouseX, mouseY) {
       }
     }
   });
+}
+
+// Function to check if a point is on a line segment
+function isPointOnLineSegment(px, py, x1, y1, x2, y2) {
+  const tolerance = 5; // Adjust as needed for click detection sensitivity
+
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+
+  const lengthSquared = dx * dx + dy * dy;
+  const dotProduct = ((px - x1) * dx + (py - y1) * dy) / lengthSquared;
+
+  if (dotProduct < 0 || dotProduct > 1) {
+    return false;
+  }
+
+  const closestX = x1 + dotProduct * dx;
+  const closestY = y1 + dotProduct * dy;
+
+  const distanceSquared = (px - closestX) * (px - closestX) + (py - closestY) * (py - closestY);
+
+  return distanceSquared < tolerance * tolerance;
 }
 
 function handleMouseUp(mouseX, mouseY) {
@@ -409,13 +480,26 @@ function handleMouseUp(mouseX, mouseY) {
               (conn) => conn.from === selectedTower && conn.to === tower
             );
 
-            if (fromConnections < 2 && !existingConnection) {
+            const MAX_CONNECTIONS_PER_TOWER = 3; // Adjust as needed
+
+            if (fromConnections < MAX_CONNECTIONS_PER_TOWER && !existingConnection) {
               connections.push({
                 from: selectedTower,
                 to: tower,
                 isAttack: isAttack,
               });
               connectionMade = true;
+
+              // Since making a connection counts as a move, switch turns if in multiplayer mode
+              if (gameMode === 'multiplayer') {
+                currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+                updateTurnIndicator();
+              }
+
+              // Clear lastAction as a new action has been made
+              lastAction = null;
+              clearTimeout(undoTimeout);
+              undoButton.style.display = 'none';
             }
           }
         }
@@ -423,11 +507,6 @@ function handleMouseUp(mouseX, mouseY) {
     });
 
     selectedTower = null;
-
-    if (gameMode === 'multiplayer' && connectionMade) {
-      currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
-      updateTurnIndicator();
-    }
   }
 }
 
@@ -509,12 +588,26 @@ function gameLoop() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Send units along the connection
+    // Determine if units should be sent along the connection
     const minStrength = 1; // Minimum strength to keep
-    if (conn.from.strength > minStrength + 0.5) {
-      const sendRate = 0.1; // Reduced send rate to prevent rapid depletion
-      conn.from.strength -= sendRate;
+    const sendRate = 0.1; // Send rate for units
 
+    let shouldSendUnits = false;
+
+    if (conn.isAttack) {
+      shouldSendUnits = true; // Always send units for attack
+    } else {
+      // Support connection
+      if (conn.to.strength < conn.to.maxStrength) {
+        shouldSendUnits = true;
+      } else {
+        shouldSendUnits = false;
+      }
+    }
+
+    if (shouldSendUnits && conn.from.strength > minStrength + sendRate) {
+      // Send units
+      conn.from.strength -= sendRate;
       units.push(new Unit(conn.from, conn.to, conn.from.owner, conn.isAttack));
     }
 
@@ -522,7 +615,9 @@ function gameLoop() {
     if (conn.isAttack) {
       conn.to.isUnderAttack = true;
     } else {
-      conn.to.incomingSupport = true;
+      if (shouldSendUnits) {
+        conn.to.incomingSupport = true;
+      }
     }
   });
 
@@ -627,7 +722,9 @@ function aiTurn() {
 
         const fromConnections = connections.filter(conn => conn.from === aiTower).length;
 
-        if (fromConnections < 2 && !existingConnection) {
+        const MAX_CONNECTIONS_PER_TOWER = 3; // Adjust as needed
+
+        if (fromConnections < MAX_CONNECTIONS_PER_TOWER && !existingConnection) {
           connections.push({
             from: aiTower,
             to: bestTarget,
@@ -717,6 +814,10 @@ function resetGame() {
   infoIcon.style.display = 'none';
   gameLegend.style.display = 'none';
   legendToggle.style.display = 'none'; // Hide the legend toggle button
+  passButton.style.display = 'none'; // Hide the pass turn button
+  undoButton.style.display = 'none'; // Hide the undo button
+  lastAction = null;
+  clearTimeout(undoTimeout);
 }
 
 // Pause and Resume Controls
@@ -749,6 +850,58 @@ legendToggle.addEventListener('click', () => {
   }
 });
 
+// Pass Turn Functionality
+passButton.addEventListener('click', () => {
+  if (gameMode === 'multiplayer') {
+    currentPlayer = currentPlayer === 'player1' ? 'player2' : 'player1';
+    updateTurnIndicator();
+  }
+});
+
+// Undo Functionality
+function showUndoOption() {
+  undoButton.style.display = 'inline-block';
+
+  // Clear any existing timeout
+  clearTimeout(undoTimeout);
+
+  // Set a timeout to hide the undo option after 5 seconds
+  undoTimeout = setTimeout(() => {
+    undoButton.style.display = 'none';
+    lastAction = null;
+  }, 5000);
+}
+
+undoButton.addEventListener('click', () => {
+  undoLastAction();
+});
+
+function undoLastAction() {
+  if (lastAction && lastAction.type === 'removeConnection') {
+    // Restore the removed connection
+    connections.splice(lastAction.index, 0, lastAction.connection);
+
+    // Restore the player's turn if in multiplayer mode
+    if (gameMode === 'multiplayer') {
+      currentPlayer = lastAction.player;
+      updateTurnIndicator();
+    }
+
+    // Clear lastAction and hide undo button
+    lastAction = null;
+    clearTimeout(undoTimeout);
+    undoButton.style.display = 'none';
+  }
+}
+
+// Keyboard shortcut for undo (Ctrl+Z or Cmd+Z)
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    e.preventDefault();
+    undoLastAction();
+  }
+});
+
 // Prevent scrolling on mobile devices
 document.body.addEventListener('touchmove', function(event) {
   event.preventDefault();
@@ -757,8 +910,10 @@ document.body.addEventListener('touchmove', function(event) {
 // Start the game when the page loads
 window.onload = () => {
   resizeCanvas();
-  // Hide the info icon, game legend, and legend toggle button on load
+  // Hide the info icon, game legend, legend toggle button, and pass button on load
   infoIcon.style.display = 'none';
   gameLegend.style.display = 'none';
   legendToggle.style.display = 'none';
+  passButton.style.display = 'none';
+  undoButton.style.display = 'none';
 };
